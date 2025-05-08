@@ -1,0 +1,20 @@
+Gray_cloth  #机背的灰色蒙布
+oil_cap_screw_on #滑油口螺钉 开启
+oil_cap_screw_off #滑油口螺钉 关闭
+oil_cap_off  #滑油口关闭
+oil_cap_on 
+resistance_umbrellas_on #阻力伞盖开启
+resistance_umbrellas_off
+magnetic_patches_on #磁吸贴片盖 有无（黑色）
+magnetic_patches_off 
+red_band_on #L型红色带子 有
+red_band_off
+Apu_cap_on # Apu前舱口盖打开
+Apu_cap_off
+APU_screw_on #apu螺钉开启 未恢复完整
+APU_screw_off
+
+hook_bin_on #挂单
+hook_bin_off 
+air_condition_inflation_on #空调充气
+air_condition_inflation_off

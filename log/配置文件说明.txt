@@ -1,0 +1,69 @@
+# 日志模块配置说明
+
+## 概述
+本日志模块提供了统一的日志记录功能，支持将不同模块的日志分别输出到控制台和文件中。
+
+## 配置文件
+日志模块使用两种配置方式：
+1. 代码中的默认配置（DEFAULT_LOG_CONFIG）
+2. logging.conf 配置文件
+
+## 使用方法
+
+### 1. 获取MQ模块的日志记录器
+```python
+from log.unified_log import get_mq_logger
+
+# 使用默认配置
+logger = get_mq_logger()
+
+# 指定日志目录
+logger = get_mq_logger(log_dir='logs')
+
+# 指定日志目录和文件名
+logger = get_mq_logger(log_dir='logs', log_file='my_mq.log')
+```
+
+### 2. 获取YOLO RTSP模块的日志记录器
+```python
+from log.unified_log import get_yolo_rtsp_logger
+
+# 使用默认配置（文件名会自动添加时间戳）
+logger = get_yolo_rtsp_logger()
+
+# 指定日志目录
+logger = get_yolo_rtsp_logger(log_dir='logs')
+
+# 指定日志目录和文件名
+logger = get_yolo_rtsp_logger(log_dir='logs', log_file='my_rtsp.log')
+```
+
+### 3. 自定义日志配置
+```python
+from log.unified_log import setup_logging
+
+# 获取根日志记录器
+logger = setup_logging()
+
+# 获取自定义模块的日志记录器
+logger = setup_logging('my_module', log_dir='logs', log_file='my_module.log')
+```
+
+## 日志级别
+日志模块支持以下日志级别（从低到高）：
+- DEBUG：调试信息
+- INFO：一般信息
+- WARNING：警告信息
+- ERROR：错误信息
+- CRITICAL：严重错误信息
+
+## 日志格式
+默认的日志格式为：
+```
+%(asctime)s - %(name)s - %(levelname)s - %(message)s
+```
+
+示例：
+```
+2023-01-01 12:00:00 - yolo_rtsp - INFO - 这是一条信息
+```
