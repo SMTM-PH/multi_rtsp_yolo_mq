@@ -21,7 +21,11 @@ class EventDetector:
             'cabin_cover_off': None,
             'red_off': None,
             'red_on': None,
-            'aviator': None
+            'aviator': None,
+            'hook_bin_on': None, #挂单
+            'hook_bin_off' : None,
+            'air_condition_inflation_on': None, #空调充气
+            'air_condition_inflation_off': None
         }
         # 存储当前帧的检测框
         self.current_boxes = {
@@ -29,7 +33,11 @@ class EventDetector:
             'cabin_cover_off': None,
             'red_off': None,
             'red_on': None,
-            'aviator': None
+            'aviator': None,
+            'hook_bin_on': None, #挂单
+            'hook_bin_off' : None,
+            'air_condition_inflation_on': None, #空调充气
+            'air_condition_inflation_off': None
         }
 
         # 状态标志
@@ -42,6 +50,8 @@ class EventDetector:
         self.movement_threshold = 50  # 移动阈值
         self.last_event_time = {}  # 记录每个事件的最后一次检测时间
         self.last_aviator_detected = False  # 记录上一帧是否检测到飞行员
+        self.last_hook_bin_status = 0  # 记录上一帧是否检测到挂单
+        self.last_air_condition_inflation_status = 0  # 记录上一帧是否检测到空调充气
 
     def calculate_iou(self, box1, box2):
         """计算两个框的交并比（IoU）"""
@@ -172,7 +182,10 @@ class LeftEventDetector(EventDetector):
             'pilot_in_hangar': 0,        # 0=不在机库, 1=在机库
             'cabin_cover_state': 0,       # 0=无效, 1=打开, 2=关闭
             'skin': 0,                   # 0=无效, 1=有, 2=无
-            'cabin_occupied': 0,         
+            'cabin_occupied': 0, 
+            'hook_bin_status': 0, #挂单状态 0 无效 1 有 2 无
+            'air_condition_inflation_status': 0 # 0 无效 1 充气 2 无
+
         }
         
         # 获取飞行员和座舱数据
@@ -200,6 +213,41 @@ class LeftEventDetector(EventDetector):
         else:
             event_status['pilot_in_hangar'] = 0
         self.last_aviator_detected = current_aviator_detected
+
+        #检测挂弹和充气状态
+        current_hook_bin_status = self.current_boxes['hook_bin_on'] is not None
+        if current_hook_bin_status:
+            if 'hook_bin' in self.last_event_time:
+                last_time = self.last_event_time.get('hook_bin', 0) 
+                if current_time - last_time > 1200:  # 20分钟 = 1200秒
+                    yolo_logger.info("检测到挂弹")
+                    self.last_event_time['hook_bin'] = current_time
+                    event_status['hook_bin_status'] = 1
+            else:
+                self.last_event_time['hook_bin'] = current_time
+        else:
+            if self.current_boxes['hook_bin_off'] is not None:
+                event_status['hook_bin_status'] = 2
+            else:
+                event_status['hook_bin_status'] = 0
+        self.last_hook_bin_status = current_hook_bin_status
+
+        current_air_condition_inflation_status = self.current_boxes['air_condition_inflation_on'] is not None
+        if current_air_condition_inflation_status:
+            if 'air_condition_inflation' in  self.last_event_time:
+                last_time = self.last_event_time.get('air_condition_inflation', 0)
+                if current_time - last_time > 1200:  # 20分钟 = 1200秒
+                    yolo_logger.info("检测到充气")
+                    self.last_event_time['air_condition_inflation'] = current_time
+                    event_status['air_condition_inflation_status'] = 1
+            else:
+                self.last_event_time['air_condition_inflation'] = current_time
+        else:
+            if self.current_boxes['air_condition_inflation_off'] is not None:
+                event_status['air_condition_inflation_status'] = 2
+            else:
+                event_status['air_condition_inflation_status'] = 0
+        self.last_air_condition_inflation_status = current_air_condition_inflation_status
 
         if is_first_detect:
             has_plane_now = self.has_plane_parts(self.current_boxes)
